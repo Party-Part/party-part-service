@@ -101,6 +101,46 @@
           }
         }
       }
+    },
+    "/party/member/{partyId}": {
+      "put": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Add member to a party",
+        "description": "",
+        "operationId": "addPartyMember",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "partyId",
+            "type": "string",
+            "description": "The patry id",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "userId",
+            "type": "string",
+            "description": "The user id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
     }
   },
   "definitions": {
