@@ -141,6 +141,77 @@
           }
         }
       }
+    },
+    "/party/enrty/{partyId}": {
+      "put": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Add enrty to a party",
+        "description": "",
+        "operationId": "addPartyEntry",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "partyId",
+            "type": "string",
+            "description": "The patry id",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "userCreatorId",
+            "type": "string",
+            "description": "The user creator id",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "userWhoPaidId",
+            "type": "string",
+            "description": "The user who paid id",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "name",
+            "type": "string",
+            "description": "The entry name"
+          },
+          {
+            "in": "formData",
+            "name": "cost",
+            "type": "string",
+            "description": "The entry cost"
+          },
+          {
+            "in": "formData",
+            "name": "currency",
+            "type": "string",
+            "description": "The entry currency"
+          },
+          {
+            "in": "formData",
+            "name": "split",
+            "type": "string",
+            "description": "Array how to split enrty in format [(\"UserId\", \"percent\"),(...),..]"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
     }
   },
   "definitions": {
