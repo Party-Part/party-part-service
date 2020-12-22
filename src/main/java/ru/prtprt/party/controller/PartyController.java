@@ -1,68 +1,70 @@
 package ru.prtprt.party.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpStatus;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import ru.prtprt.party.entity.PartyEntity;
+import ru.prtprt.party.entity.UserEntity;
+import ru.prtprt.party.mapper.PartyMapper;
 import ru.prtprt.party.model.api.PartyApi;
-import ru.prtprt.party.model.model.ArrayOfEntries;
-import ru.prtprt.party.model.model.ArrayOfMembers;
-import ru.prtprt.party.model.model.ArrayOfPayments;
+import ru.prtprt.party.model.model.CreatePartyRequest;
 import ru.prtprt.party.model.model.Party;
+import ru.prtprt.party.repository.PartyRepository;
+import ru.prtprt.party.repository.UserRepository;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.math.BigInteger;
 import java.util.Optional;
 
+
+@RequiredArgsConstructor
 @RestController
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PartyController implements PartyApi {
-    @Override
-    public Optional<ObjectMapper> getObjectMapper() {
-        return Optional.empty();
-    }
+
+    PartyMapper partyMapper;
+
+    PartyRepository partyRepository;
+    UserRepository userRepository;
 
     @Override
-    public Optional<HttpServletRequest> getRequest() {
-        return Optional.empty();
-    }
+    public ResponseEntity<Party> createParty(@Valid CreatePartyRequest body) {
 
-    @Override
-    public Optional<String> getAcceptHeader() {
-        return Optional.empty();
-    }
+        PartyEntity partyEntity = new PartyEntity();
+        partyEntity.setName(body.getName());
+        partyEntity.setCreatorId(new BigInteger(body.getUserId()));
 
-    @Override
-    public ResponseEntity<String> addPartyEntry(String partyId) {
-        return null;
-    }
+        partyRepository.save(partyEntity);
 
-    @Override
-    public ResponseEntity<Void> addPartyMember(String partyId) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<ArrayOfPayments> calculateParty(String partyId) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<Party> createParty() {
-        return null;
+        Party response = partyMapper.mapPartyEntityToParty(partyEntity);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<Party> getParty(String partyId) {
-        return new ResponseEntity<Party>(
-                new Party().name("test ok"), HttpStatus.OK);
+        Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
+
+        if (partyEntityOpt.isPresent()) {
+            Party response = partyMapper.mapPartyEntityToParty(partyEntityOpt.get());
+            return ResponseEntity.ok(response);
+        } else
+            return ResponseEntity.notFound().build();
     }
 
     @Override
-    public ResponseEntity<ArrayOfEntries> getPartyEntries(String partyId) {
-        return null;
-    }
+    public ResponseEntity<Void> addPartyMember(String partyId, @Valid String userId) {
 
-    @Override
-    public ResponseEntity<ArrayOfMembers> getPartyMembers(String partyId) {
-        return null;
+        Optional<UserEntity> userEntityOpt = userRepository.findById(new BigInteger(userId));
+        Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
+
+        if (userEntityOpt.isEmpty() || partyEntityOpt.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        partyEntityOpt.get().getMemberInParty().add(userEntityOpt.get());
+        partyRepository.save(partyEntityOpt.get());
+
+        return ResponseEntity.ok().build();
     }
 }
