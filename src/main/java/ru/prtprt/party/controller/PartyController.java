@@ -101,8 +101,6 @@ public class PartyController implements PartyApi {
         partyEntityOpt.get().getEntries().add(entryEntity);
         entryRepository.save(entryEntity);
 
-        System.out.println("Party id3 " + partyEntityOpt.get().getPartyId());
-
         //parse split entities and save (update) manually
         HashSet<SplitEntity> splitEntities = new HashSet<>();
         Arrays.stream(body.getSplit().split(";"))
@@ -123,8 +121,6 @@ public class PartyController implements PartyApi {
 
         splitRepository.deleteAll(splitRepository.findAllByIdEntry(entryEntity.getEntryId()));
         splitRepository.saveAll(splitEntities);
-
-        System.out.println(entryEntity.getEntryId());
 
         return ResponseEntity.ok().build();
     }
