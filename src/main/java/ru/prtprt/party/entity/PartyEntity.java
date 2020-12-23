@@ -20,6 +20,7 @@ public class PartyEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "party_id")
     BigInteger partyId;
     BigInteger creatorId;
     String name;
