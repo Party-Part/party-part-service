@@ -30,9 +30,8 @@ public class EntryEntity {
 //    @JoinTable(name = "\"user\"",
 //            joinColumns = @JoinColumn(name = "user_id"))
     BigInteger userIdWhoPaid;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "party",
-            joinColumns = @JoinColumn(name = "party_id"))
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "party_id", nullable = false)
     PartyEntity party;
     String name;
     BigDecimal cost;

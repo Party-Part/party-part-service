@@ -82,8 +82,6 @@ public class PartyController implements PartyApi {
 
     @Override
     public ResponseEntity<String> addPartyEntry(String partyId, @Valid AddPartyEntryRequest body) {
-
-
         Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
         Optional<UserEntity> userCreatorEntityOpt = userRepository.findById(new BigInteger(body.getUserCreatorId()));
         Optional<UserEntity> userWhoPaidEntityOpt = userRepository.findById(new BigInteger(body.getUserWhoPaidId()));
@@ -100,22 +98,25 @@ public class PartyController implements PartyApi {
         entryEntity.setUserIdWhoPaid(new BigInteger(body.getUserWhoPaidId()));
         entryEntity.setParty(partyEntityOpt.get());
 
-        System.out.println(Arrays.toString(body.getSplit().split(";")));
+        partyEntityOpt.get().getEntries().add(entryEntity);
+        entryRepository.save(entryEntity);
 
+        System.out.println("Party id3 " + partyEntityOpt.get().getPartyId());
+
+        //parse split entities and save (update) manually
         HashSet<SplitEntity> splitEntities = new HashSet<>();
-
         Arrays.stream(body.getSplit().split(";"))
                 .map(str -> str.replace("(", "").replace(")", "").trim())
                 .forEach(str -> {
                             //pair <userId, percent>
                             String[] splitted = str.split(",");
-                            UserEntity splitUser = userRepository.findById(new BigInteger(splitted[0])).orElseThrow();
+                            UserEntity splitUser = userRepository.findById(new BigInteger(splitted[0].trim())).orElseThrow();
                             SplitEntityId splitEntityId = new SplitEntityId();
                             splitEntityId.setEntry(entryEntity.getEntryId());
                             splitEntityId.setUser(splitUser.getUserId());
                             SplitEntity splitEntity = new SplitEntity();
                             splitEntity.setId(splitEntityId);
-                            splitEntity.setPercent(new BigDecimal(splitted[1]));
+                            splitEntity.setPercent(new BigDecimal(splitted[1].trim()));
                             splitEntities.add(splitEntity);
                         }
                 );
@@ -123,7 +124,6 @@ public class PartyController implements PartyApi {
         splitRepository.deleteAll(splitRepository.findAllByIdEntry(entryEntity.getEntryId()));
         splitRepository.saveAll(splitEntities);
 
-        entryRepository.save(entryEntity);
         System.out.println(entryEntity.getEntryId());
 
         return ResponseEntity.ok().build();
