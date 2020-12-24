@@ -3,6 +3,7 @@ package ru.prtprt.party.controller;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.prtprt.party.entity.EntryEntity;
@@ -12,9 +13,7 @@ import ru.prtprt.party.entity.UserEntity;
 import ru.prtprt.party.entity.embedded.SplitEntityId;
 import ru.prtprt.party.mapper.PartyMapper;
 import ru.prtprt.party.model.api.PartyApi;
-import ru.prtprt.party.model.model.AddPartyEntryRequest;
-import ru.prtprt.party.model.model.CreatePartyRequest;
-import ru.prtprt.party.model.model.Party;
+import ru.prtprt.party.model.model.*;
 import ru.prtprt.party.repository.EntryRepository;
 import ru.prtprt.party.repository.PartyRepository;
 import ru.prtprt.party.repository.SplitRepository;
@@ -23,10 +22,8 @@ import ru.prtprt.party.repository.UserRepository;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -78,6 +75,29 @@ public class PartyController implements PartyApi {
         partyRepository.save(partyEntityOpt.get());
 
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<ArrayOfMembers> getPartyMembers(String partyId) {
+        Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
+
+        if (partyEntityOpt.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        ArrayOfMembers arrayOfMembers = new ArrayOfMembers();
+
+        List<UserEntity> listOfUsers = partyEntityOpt.get().getMemberInParty();
+
+        List<Member> listOfMembers = listOfUsers.stream().map(userEntity -> {
+            Member member = new Member();
+            member.setLogin(userEntity.getLogin());
+            member.setUserId(userEntity.getUserId().toString());
+            return member;
+        }).collect(Collectors.toList());
+
+        arrayOfMembers.addAll(listOfMembers);
+
+        return ResponseEntity.ok(arrayOfMembers);
     }
 
     @Override
