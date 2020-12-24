@@ -3,7 +3,6 @@ package ru.prtprt.party.controller;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.prtprt.party.entity.EntryEntity;
@@ -22,7 +21,10 @@ import ru.prtprt.party.repository.UserRepository;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -143,5 +145,50 @@ public class PartyController implements PartyApi {
         splitRepository.saveAll(splitEntities);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<ArrayOfEntries> getPartyEntries(String partyId) {
+        Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
+
+        if (partyEntityOpt.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        List<EntryEntity> entryEntityList = partyEntityOpt.get().getEntries();
+
+        List<Entry> entryList = entryEntityList
+                .stream()
+                .map(
+                        entryEntity -> {
+                            Entry entry = new Entry();
+                            entry.setEntryId(entryEntity.getEntryId().toString());
+                            entry.setName(entryEntity.getName());
+                            entry.setPartyId(entryEntity.getParty().getPartyId().toString());
+                            entry.setCost(entryEntity.getCost().toString());
+                            entry.setCurrency(entryEntity.getCurrency());
+                            entry.setUserCreatorId(entryEntity.getUserIdCreator().toString());
+                            entry.setUserWhoPaidId(entryEntity.getUserIdWhoPaid().toString());
+
+                            List<SplitEntity> splitEntityList = splitRepository.findAllByIdEntry(entryEntity.getEntryId());
+                            List<Split> splitList = splitEntityList
+                                    .stream()
+                                    .map(splitEntity -> {
+                                        Split split = new Split();
+                                        split.setUserId(splitEntity.getId().getUser().toString());
+                                        split.setProportion(splitEntity.getPercent().toString());
+                                        return split;
+                                    })
+                                    .collect(Collectors.toList());
+                            entry.setSplit(splitList);
+                            return entry;
+                        }
+                )
+                .collect(Collectors.toList());
+
+
+        ArrayOfEntries arrayOfEntries = new ArrayOfEntries();
+        arrayOfEntries.addAll(entryList);
+
+        return ResponseEntity.ok(arrayOfEntries);
     }
 }
