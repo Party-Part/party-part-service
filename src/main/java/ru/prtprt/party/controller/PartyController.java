@@ -1,7 +1,7 @@
 package ru.prtprt.party.controller;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import javafx.util.Pair;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,10 +21,7 @@ import ru.prtprt.party.repository.UserRepository;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -136,7 +133,7 @@ public class PartyController implements PartyApi {
                             splitEntityId.setUser(splitUser.getUserId());
                             SplitEntity splitEntity = new SplitEntity();
                             splitEntity.setId(splitEntityId);
-                            splitEntity.setPercent(new BigDecimal(splitted[1].trim()));
+                            splitEntity.setCost(new BigDecimal(splitted[1].trim()));
                             splitEntities.add(splitEntity);
                         }
                 );
@@ -175,7 +172,7 @@ public class PartyController implements PartyApi {
                                     .map(splitEntity -> {
                                         Split split = new Split();
                                         split.setUserId(splitEntity.getId().getUser().toString());
-                                        split.setProportion(splitEntity.getPercent().toString());
+                                        split.setProportion(splitEntity.getCost().toString());
                                         return split;
                                     })
                                     .collect(Collectors.toList());
@@ -191,4 +188,165 @@ public class PartyController implements PartyApi {
 
         return ResponseEntity.ok(arrayOfEntries);
     }
+
+    @Override
+    public ResponseEntity<ArrayOfPayments> calculateParty(String partyId) {
+        Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
+
+        if (partyEntityOpt.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        List<EntryEntity> entryEntityList = partyEntityOpt.get().getEntries();
+
+        List<Pair<BigInteger, BigDecimal>> payingList = entryEntityList
+                .stream()
+                .map(entryEntity -> new Pair<>(entryEntity.getUserIdWhoPaid(), entryEntity.getCost()))
+                .collect(Collectors.toList());
+
+        List<Pair<BigInteger, BigDecimal>> debtsList = entryEntityList
+                .stream()
+                .map(entryEntity ->
+                        splitRepository.findAllByIdEntry(entryEntity.getEntryId()))
+                .flatMap(Collection::stream)
+                .map(splitEntity -> new Pair<>(splitEntity.getId().getUser(), splitEntity.getCost()))
+                .collect(Collectors.toList());
+
+        System.out.println("Paying:");
+        payingList.forEach(pair -> System.out.println(pair.getKey() + ":" + pair.getValue()));
+        System.out.println("Debts:");
+        debtsList.forEach(pair -> System.out.println(pair.getKey() + ":" + pair.getValue()));
+
+        Map<BigInteger, BigDecimal> payingMap = new HashMap<>();
+        payingList.forEach(
+                pair -> payingMap.merge(pair.getKey(), pair.getValue(), BigDecimal::add)
+        );
+        Map<BigInteger, BigDecimal> debtsMap = new HashMap<>();
+        debtsList.forEach(
+                pair -> debtsMap.merge(pair.getKey(), pair.getValue(), BigDecimal::add)
+        );
+
+        System.out.println("Paying:");
+        payingMap.forEach((key, value) -> System.out.println(key + ":" + value));
+        System.out.println("Debts:");
+        debtsMap.forEach((key, value) -> System.out.println(key + ":" + value));
+
+        List<BigInteger> totalUsersList = new LinkedList<>();
+        totalUsersList.addAll(payingMap.keySet());
+        totalUsersList.addAll(debtsMap.keySet());
+        totalUsersList = totalUsersList
+                .stream()
+                .distinct()
+                .collect(Collectors.toList());
+
+        System.out.println("Total users:");
+        totalUsersList.forEach(System.out::println);
+
+
+        //calculate total credit for all members (payment-debts)
+        //key - user, value - how much the user owes to other users
+        Map<BigInteger, BigDecimal> creditMap = new HashMap<>();
+        totalUsersList.forEach(user -> creditMap.put(user, BigDecimal.ZERO));
+
+        payingMap.keySet()
+                .forEach(key -> creditMap.replace(key, creditMap.get(key).subtract(payingMap.get(key))));
+        debtsMap.keySet()
+                .forEach(key -> creditMap.replace(key, creditMap.get(key).add(debtsMap.get(key))));
+
+        System.out.println("Total credits:");
+        creditMap.forEach((key, value) -> System.out.println(key + ":" + value));
+
+        //who receive money
+        Map<BigInteger, BigDecimal> recipientMap = new HashMap<>();
+        //who send money
+        Map<BigInteger, BigDecimal> senderMap = new HashMap<>();
+
+        creditMap.forEach((key, value) -> {
+            if (value.compareTo(BigDecimal.ZERO) > 0)
+                senderMap.put(key, value);
+            else if (value.compareTo(BigDecimal.ZERO) < 0)
+                recipientMap.put(key, value);
+        });
+
+        System.out.println("recipientMap:");
+        recipientMap.forEach((key, value) -> System.out.println(key + ":" + value));
+        System.out.println("senderMap:");
+        senderMap.forEach((key, value) -> System.out.println(key + ":" + value));
+
+        //set sender and recipient credits by reverse order
+        LinkedList<Pair<BigInteger, BigDecimal>> senderSortedList = new LinkedList<>();
+        LinkedList<Pair<BigInteger, BigDecimal>> recipientSortedList = new LinkedList<>();
+        senderMap.forEach((key, value) -> senderSortedList.add(new Pair<>(key, value)));
+        recipientMap.forEach((key, value) -> recipientSortedList.add(new Pair<>(key, value)));
+        Comparator<Pair<BigInteger, BigDecimal>> comparatorByCost = Comparator.comparing(Pair::getValue);
+        senderSortedList.sort(comparatorByCost.reversed());
+        recipientSortedList.sort(comparatorByCost);
+
+        System.out.println("recipient sorted list:");
+        recipientSortedList.forEach(pair -> System.out.println(pair.getKey() + ":" + pair.getValue()));
+        System.out.println("sender sorted list:");
+        senderSortedList.forEach(pair -> System.out.println(pair.getKey() + ":" + pair.getValue()));
+
+
+        System.out.println("TEST");
+        System.out.println("TEST");
+        System.out.println("TEST");
+        System.out.println("TEST");
+        System.out.println("TEST");
+
+
+        List<Payment> payments = new LinkedList<>();
+        //create result
+        while (!senderSortedList.isEmpty()) {
+            Pair<BigInteger, BigDecimal> senderPair = senderSortedList.get(0);
+            Pair<BigInteger, BigDecimal> recipientPair = recipientSortedList.get(0);
+
+            System.out.println("TEST");
+            System.out.println("recipientPair sorted list:");
+            recipientSortedList.forEach(p -> System.out.println(senderPair.getKey() + ":" + p.getValue()));
+            System.out.println("sender sorted list:");
+            senderSortedList.forEach(p -> System.out.println(senderPair.getKey() + ":" + p.getValue()));
+
+
+            BigDecimal difference = senderPair.getValue().add(recipientPair.getValue());
+            if (difference.compareTo(BigDecimal.ZERO) < 0) {
+                payments.add(new Payment(senderPair.getKey(), recipientPair.getKey(), senderPair.getValue()));
+                recipientSortedList.remove(0);
+                recipientSortedList.add(new Pair<>(recipientPair.getKey(), difference));
+                recipientSortedList.sort(comparatorByCost);
+                senderSortedList.remove(0);
+                System.out.println("a");
+            } else if (difference.compareTo(BigDecimal.ZERO) > 0) {
+                payments.add(new Payment(senderPair.getKey(), recipientPair.getKey(), recipientPair.getValue().abs()));
+                recipientSortedList.remove(0);
+                senderSortedList.remove(0);
+                senderSortedList.addFirst(new Pair<>(senderPair.getKey(), difference));
+                System.out.println("b");
+            } else {
+                payments.add(new Payment(senderPair.getKey(), recipientPair.getKey(), senderPair.getValue()));
+                recipientSortedList.remove(0);
+                senderSortedList.remove(0);
+                System.out.println("c");
+            }
+
+        }
+
+        System.out.println(payments);
+
+
+        return ResponseEntity.ok(null);
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @ToString
+    class Payment {
+        BigInteger from;
+        BigInteger to;
+        BigDecimal cost;
+    }
+
+
 }

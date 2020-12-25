@@ -20,6 +20,6 @@ public class SplitEntity {
 
     @EmbeddedId
     SplitEntityId id;
-    BigDecimal percent;
+    BigDecimal cost;
 
 }
