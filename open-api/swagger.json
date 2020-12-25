@@ -38,24 +38,19 @@
         "description": "",
         "operationId": "createParty",
         "consumes": [
-          "multipart/form-data"
+          "application/json"
         ],
         "produces": [
           "application/json"
         ],
         "parameters": [
           {
-            "in": "formData",
+            "in": "body",
             "name": "userId",
-            "type": "string",
+            "schema": {
+              "$ref": "#/definitions/CreatePartyRequest"
+            },
             "description": "User who creates the party",
-            "required": true
-          },
-          {
-            "in": "formData",
-            "name": "name",
-            "type": "string",
-            "description": "Name of the party",
             "required": true
           }
         ],
@@ -114,7 +109,7 @@
         "description": "",
         "operationId": "addPartyMember",
         "consumes": [
-          "multipart/form-data"
+          "application/json"
         ],
         "produces": [
           "application/json"
@@ -128,11 +123,13 @@
             "required": true
           },
           {
-            "in": "formData",
+            "in": "body",
             "name": "userId",
-            "type": "string",
-            "description": "The user id",
-            "required": true
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The user id"
+            }
           }
         ],
         "responses": {
@@ -152,7 +149,7 @@
         "description": "",
         "operationId": "getPartyMembers",
         "consumes": [
-          "multipart/form-data"
+          "application/json"
         ],
         "produces": [
           "application/json"
@@ -188,7 +185,7 @@
         "description": "",
         "operationId": "addPartyEntry",
         "consumes": [
-          "multipart/form-data"
+          "application/json"
         ],
         "produces": [
           "application/json"
@@ -202,45 +199,13 @@
             "required": true
           },
           {
-            "in": "formData",
-            "name": "userCreatorId",
-            "type": "string",
-            "description": "The user creator id",
+            "in": "body",
+            "name": "addPartyEntryRequest",
+            "schema": {
+              "$ref": "#/definitions/AddPartyEntryRequest"
+            },
+            "description": "add party enrty request",
             "required": true
-          },
-          {
-            "in": "formData",
-            "name": "userWhoPaidId",
-            "type": "string",
-            "description": "The user who paid id",
-            "required": true
-          },
-          {
-            "in": "formData",
-            "name": "name",
-            "type": "string",
-            "required": true,
-            "description": "The entry name"
-          },
-          {
-            "in": "formData",
-            "name": "cost",
-            "type": "string",
-            "required": true,
-            "description": "The entry cost"
-          },
-          {
-            "in": "formData",
-            "name": "currency",
-            "type": "string",
-            "required": true,
-            "description": "The entry currency"
-          },
-          {
-            "in": "formData",
-            "name": "split",
-            "type": "string",
-            "description": "Array how to split enrty in format [(\"UserId\", \"percent\"),(...),..]. By default - equally by all members"
           }
         ],
         "responses": {
@@ -323,6 +288,48 @@
     }
   },
   "definitions": {
+    "CreatePartyRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Big int user creator id"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of a party"
+        }
+      }
+    },
+    "AddPartyEntryRequest": {
+      "type": "object",
+      "properties": {
+        "userCreatorId": {
+          "type": "string",
+          "description": "The user creator id"
+        },
+        "userWhoPaidId": {
+          "type": "string",
+          "description": "The user who paid id"
+        },
+        "name": {
+          "type": "string",
+          "description": "The entry name"
+        },
+        "cost": {
+          "type": "string",
+          "description": "The entry cost"
+        },
+        "currency": {
+          "type": "string",
+          "description": "The entry currency"
+        },
+        "split": {
+          "type": "string",
+          "description": "Array how to split enrty in format [(\"UserId\", \"percent\"),(...),..]. By default - equally by all members"
+        }
+      }
+    },
     "Party": {
       "type": "object",
       "properties": {
