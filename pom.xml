@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.prtprt</groupId>
-    <artifactId>party-part-serice</artifactId>
+    <artifactId>party-part-service</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
@@ -122,6 +122,14 @@
                 <configuration>
                     <source>11</source>
                     <target>11</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.3</version>
+                <configuration>
+                    <mainClass>ru.prtprt.party.PartyApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
