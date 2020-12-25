@@ -1,8 +1,10 @@
 package ru.prtprt.party.controller;
 
+import javafx.util.BuilderFactory;
 import javafx.util.Pair;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.prtprt.party.entity.EntryEntity;
@@ -216,6 +218,15 @@ public class PartyController implements PartyApi {
         System.out.println("Debts:");
         debtsList.forEach(pair -> System.out.println(pair.getKey() + ":" + pair.getValue()));
 
+        Optional<BigDecimal> totalPayingOpt = payingList.stream().map(Pair::getValue).reduce(BigDecimal::add);
+        Optional<BigDecimal> totalDebtsOpt = debtsList.stream().map(Pair::getValue).reduce(BigDecimal::add);
+
+        //if total paying not equal total debts return error
+        if(totalPayingOpt.isEmpty() ||
+            totalDebtsOpt.isEmpty() ||
+            !totalPayingOpt.get().subtract(totalDebtsOpt.get()).equals(BigDecimal.ZERO))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+
         Map<BigInteger, BigDecimal> payingMap = new HashMap<>();
         payingList.forEach(
                 pair -> payingMap.merge(pair.getKey(), pair.getValue(), BigDecimal::add)
@@ -327,12 +338,9 @@ public class PartyController implements PartyApi {
                 senderSortedList.remove(0);
                 System.out.println("c");
             }
-
         }
 
         System.out.println(payments);
-
-
         return ResponseEntity.ok(null);
     }
 
@@ -342,11 +350,10 @@ public class PartyController implements PartyApi {
     @Setter
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @ToString
+    private static
     class Payment {
         BigInteger from;
         BigInteger to;
         BigDecimal cost;
     }
-
-
 }
