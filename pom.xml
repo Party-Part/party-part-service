@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.prtprt</groupId>
-    <artifactId>party-part-serice</artifactId>
+    <artifactId>party-part-service</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
