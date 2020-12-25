@@ -1,6 +1,5 @@
 package ru.prtprt.party.controller;
 
-import javafx.util.BuilderFactory;
 import javafx.util.Pair;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -222,9 +221,9 @@ public class PartyController implements PartyApi {
         Optional<BigDecimal> totalDebtsOpt = debtsList.stream().map(Pair::getValue).reduce(BigDecimal::add);
 
         //if total paying not equal total debts return error
-        if(totalPayingOpt.isEmpty() ||
-            totalDebtsOpt.isEmpty() ||
-            !totalPayingOpt.get().subtract(totalDebtsOpt.get()).equals(BigDecimal.ZERO))
+        if (totalPayingOpt.isEmpty() ||
+                totalDebtsOpt.isEmpty() ||
+                !totalPayingOpt.get().subtract(totalDebtsOpt.get()).equals(BigDecimal.ZERO))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         Map<BigInteger, BigDecimal> payingMap = new HashMap<>();
