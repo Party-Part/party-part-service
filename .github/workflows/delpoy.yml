@@ -63,4 +63,4 @@ jobs:
         script: |
           sudo docker stop $(sudo docker ps -a -q --filter="name=${{ secrets.DOCKER_REGISTRY_G }}/${{secrets.DOCKER_REPO_G}}/party-part-party-service")
           sudo docker pull ${{ secrets.DOCKER_REGISTRY_G }}/${{secrets.DOCKER_REPO_G}}/party-part-party-service:latest
-          sudo docker run -it --rm -p 8080:8080 ${{ secrets.DOCKER_REGISTRY_G }}/${{secrets.DOCKER_REPO_G}}/party-part-party-service:latest
+          sudo docker run -it --rm -p 8080:8080 -d ${{ secrets.DOCKER_REGISTRY_G }}/${{secrets.DOCKER_REPO_G}}/party-part-party-service:latest
