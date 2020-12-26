@@ -41,6 +41,7 @@ jobs:
         registry: ${{ secrets.DOCKER_REGISTRY_G }}
         username: oauth
         password: ${{ secrets.CR_YANDEX_TOKEN_G }}
+    - run: ls -a
     - name: Build and push
       id: docker_build
       uses: docker/build-push-action@v2
