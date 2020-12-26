@@ -11,7 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.math.BigInteger;
 
-@Entity(name = "\"user\"")
+@Entity(name = "users")
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
