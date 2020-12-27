@@ -1,14 +1,7 @@
 package ru.prtprt.party.entity.embedded;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.apache.tomcat.jni.BIOCallback;
-import ru.prtprt.party.entity.EntryEntity;
-import ru.prtprt.party.entity.PartyEntity;
-import ru.prtprt.party.entity.UserEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -20,6 +13,7 @@ import java.math.BigInteger;
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString
 public class SplitEntityId implements Serializable {
     @Column(name = "entry_id")
     BigInteger entry;

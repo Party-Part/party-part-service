@@ -1,24 +1,21 @@
 package ru.prtprt.party.controller;
 
 import javafx.util.Pair;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import ru.prtprt.party.entity.EntryEntity;
-import ru.prtprt.party.entity.PartyEntity;
-import ru.prtprt.party.entity.SplitEntity;
-import ru.prtprt.party.entity.UserEntity;
+import ru.prtprt.party.entity.*;
 import ru.prtprt.party.entity.embedded.SplitEntityId;
 import ru.prtprt.party.mapper.PartyMapper;
+import ru.prtprt.party.mapper.PaymentMapper;
 import ru.prtprt.party.model.api.PartyApi;
 import ru.prtprt.party.model.model.*;
-import ru.prtprt.party.repository.EntryRepository;
-import ru.prtprt.party.repository.PartyRepository;
-import ru.prtprt.party.repository.SplitRepository;
-import ru.prtprt.party.repository.UserRepository;
+import ru.prtprt.party.repository.*;
 
+import javax.persistence.AttributeOverrides;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -32,11 +29,13 @@ import java.util.stream.Collectors;
 public class PartyController implements PartyApi {
 
     PartyMapper partyMapper;
+    PaymentMapper paymentMapper;
 
     PartyRepository partyRepository;
     UserRepository userRepository;
     EntryRepository entryRepository;
     SplitRepository splitRepository;
+    PaymentRepository paymentRepository;
 
     @Override
     public ResponseEntity<Party> createParty(@Valid CreatePartyRequest body) {
@@ -304,7 +303,7 @@ public class PartyController implements PartyApi {
         System.out.println("TEST");
 
 
-        List<Payment> payments = new LinkedList<>();
+        List<PaymentEntity> paymentEntities = new LinkedList<>();
         //create result
         while (!senderSortedList.isEmpty()) {
             Pair<BigInteger, BigDecimal> senderPair = senderSortedList.get(0);
@@ -319,40 +318,83 @@ public class PartyController implements PartyApi {
 
             BigDecimal difference = senderPair.getValue().add(recipientPair.getValue());
             if (difference.compareTo(BigDecimal.ZERO) < 0) {
-                payments.add(new Payment(senderPair.getKey(), recipientPair.getKey(), senderPair.getValue()));
+                paymentEntities.add(
+                        createPaymentEntity(senderPair.getKey(), recipientPair.getKey(), senderPair.getValue(), partyEntityOpt.get().getPartyId()));
                 recipientSortedList.remove(0);
                 recipientSortedList.add(new Pair<>(recipientPair.getKey(), difference));
                 recipientSortedList.sort(comparatorByCost);
                 senderSortedList.remove(0);
                 System.out.println("a");
             } else if (difference.compareTo(BigDecimal.ZERO) > 0) {
-                payments.add(new Payment(senderPair.getKey(), recipientPair.getKey(), recipientPair.getValue().abs()));
+                paymentEntities.add(
+                        createPaymentEntity(senderPair.getKey(), recipientPair.getKey(), recipientPair.getValue().abs(), partyEntityOpt.get().getPartyId()));
                 recipientSortedList.remove(0);
                 senderSortedList.remove(0);
                 senderSortedList.addFirst(new Pair<>(senderPair.getKey(), difference));
                 System.out.println("b");
             } else {
-                payments.add(new Payment(senderPair.getKey(), recipientPair.getKey(), senderPair.getValue()));
+                paymentEntities.add(
+                        createPaymentEntity(senderPair.getKey(), recipientPair.getKey(), senderPair.getValue(), partyEntityOpt.get().getPartyId()));
                 recipientSortedList.remove(0);
                 senderSortedList.remove(0);
                 System.out.println("c");
             }
         }
 
-        System.out.println(payments);
-        return ResponseEntity.ok(null);
+
+        System.out.println(paymentEntities);
+
+        paymentRepository.deleteAll(paymentRepository.findAllByPartyId(partyEntityOpt.get().getPartyId()));
+
+        paymentRepository.saveAll(paymentEntities);
+
+        System.out.println(paymentEntities);
+
+
+        List<Payment> payments = paymentEntities
+                .stream()
+                .map(paymentMapper::map)
+                .collect(Collectors.toList());
+
+
+        ArrayOfPayments arrayOfPayments = new ArrayOfPayments();
+        arrayOfPayments.addAll(payments);
+
+        return ResponseEntity.ok(arrayOfPayments);
     }
 
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    @ToString
-    private static
-    class Payment {
-        BigInteger from;
-        BigInteger to;
-        BigDecimal cost;
+    @Override
+    public ResponseEntity<ArrayOfPayments> getPartyPayments(String partyId) {
+        Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
+
+        if (partyEntityOpt.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        List<PaymentEntity> allByPartyId = paymentRepository.findAllByPartyId(partyEntityOpt.get().getPartyId());
+
+        if (allByPartyId.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        List<Payment> payments = allByPartyId
+                .stream()
+                .map(paymentMapper::map)
+                .collect(Collectors.toList());
+
+        ArrayOfPayments arrayOfPayments = new ArrayOfPayments();
+        arrayOfPayments.addAll(payments);
+
+        return ResponseEntity.ok(arrayOfPayments);
+    }
+
+    private PaymentEntity createPaymentEntity(BigInteger from, BigInteger to, BigDecimal cost, BigInteger partyId) {
+        PaymentEntity paymentEntity = new PaymentEntity();
+        paymentEntity.setUserIdSender(from);
+        paymentEntity.setUserIdReceiver(to);
+        paymentEntity.setCost(cost);
+        paymentEntity.setCurrency("rub");
+        paymentEntity.setPartyId(partyId);
+        paymentEntity.setIsPaid(Boolean.FALSE);
+        paymentEntity.setIsConfirmed(Boolean.FALSE);
+        return paymentEntity;
     }
 }
