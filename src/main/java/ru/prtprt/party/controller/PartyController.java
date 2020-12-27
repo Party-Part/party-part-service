@@ -35,6 +35,7 @@ public class PartyController implements PartyApi {
     EntryRepository entryRepository;
     SplitRepository splitRepository;
     PaymentRepository paymentRepository;
+    TelegramPartyRepository telegramPartyRepository;
 
     @Override
     public ResponseEntity<Party> createParty(@Valid CreatePartyRequest body) {
@@ -47,6 +48,26 @@ public class PartyController implements PartyApi {
 
         Party response = partyMapper.mapPartyEntityToParty(partyEntity);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<Party> createPartyTelegram(@Valid CreatePartyTelegramRequest body) {
+
+        PartyEntity partyEntity = new PartyEntity();
+        partyEntity.setName(body.getName());
+        partyEntity.setCreatorId(new BigInteger(body.getUserId()));
+
+        partyRepository.save(partyEntity);
+
+        TelegramPartyEntity telegramPartyEntity = new TelegramPartyEntity();
+        telegramPartyEntity.setPartyId(partyEntity.getPartyId());
+        telegramPartyEntity.setTgChat(new BigInteger(body.getChatId()));
+
+        telegramPartyRepository.save(telegramPartyEntity);
+
+        Party response = partyMapper.mapPartyEntityToParty(partyEntity);
+        return ResponseEntity.ok(response);
+
     }
 
     @Override
