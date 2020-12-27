@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import ru.prtprt.party.entity.*;
 import ru.prtprt.party.entity.embedded.SplitEntityId;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@CrossOrigin
 public class PartyController implements PartyApi {
 
     PartyMapper partyMapper;
@@ -52,6 +54,11 @@ public class PartyController implements PartyApi {
 
     @Override
     public ResponseEntity<Party> createPartyTelegram(@Valid CreatePartyTelegramRequest body) {
+
+        if(telegramPartyRepository.findById(new BigInteger(body.getChatId())).isPresent()) {
+            System.out.println("TG patry already exist");
+            return ResponseEntity.badRequest().build();
+        }
 
         PartyEntity partyEntity = new PartyEntity();
         partyEntity.setName(body.getName());
