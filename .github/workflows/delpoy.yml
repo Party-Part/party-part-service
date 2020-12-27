@@ -65,4 +65,4 @@ jobs:
           sudo docker rm party-part-party-service || true
           sudo docker pull ${{ secrets.DOCKER_REGISTRY_G }}/${{secrets.DOCKER_REPO_G}}/party-part-party-service:latest
           sudo docker run -p 8080:8080 --name party-part-party-service -d ${{ secrets.DOCKER_REGISTRY_G }}/${{secrets.DOCKER_REPO_G}}/party-part-party-service:latest
-          sudo docker image prune
+          sudo docker image prune -f
