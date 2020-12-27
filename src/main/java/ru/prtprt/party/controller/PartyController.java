@@ -23,10 +23,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@CrossOrigin(origins = "http://localhost:8080")
 public class PartyController implements PartyApi {
 
     PartyMapper partyMapper;
@@ -55,7 +55,7 @@ public class PartyController implements PartyApi {
     @Override
     public ResponseEntity<Party> createPartyTelegram(@Valid CreatePartyTelegramRequest body) {
 
-        if(telegramPartyRepository.findById(new BigInteger(body.getChatId())).isPresent()) {
+        if (telegramPartyRepository.findById(new BigInteger(body.getChatId())).isPresent()) {
             System.out.println("TG patry already exist");
             return ResponseEntity.badRequest().build();
         }
@@ -74,7 +74,6 @@ public class PartyController implements PartyApi {
 
         Party response = partyMapper.mapPartyEntityToParty(partyEntity);
         return ResponseEntity.ok(response);
-
     }
 
     @Override
@@ -212,7 +211,6 @@ public class PartyController implements PartyApi {
                 )
                 .collect(Collectors.toList());
 
-
         ArrayOfEntries arrayOfEntries = new ArrayOfEntries();
         arrayOfEntries.addAll(entryList);
 
@@ -280,7 +278,6 @@ public class PartyController implements PartyApi {
         System.out.println("Total users:");
         totalUsersList.forEach(System.out::println);
 
-
         //calculate total credit for all members (payment-debts)
         //key - user, value - how much the user owes to other users
         Map<BigInteger, BigDecimal> creditMap = new HashMap<>();
@@ -325,21 +322,12 @@ public class PartyController implements PartyApi {
         System.out.println("sender sorted list:");
         senderSortedList.forEach(pair -> System.out.println(pair.getKey() + ":" + pair.getValue()));
 
-
-        System.out.println("TEST");
-        System.out.println("TEST");
-        System.out.println("TEST");
-        System.out.println("TEST");
-        System.out.println("TEST");
-
-
         List<PaymentEntity> paymentEntities = new LinkedList<>();
         //create result
         while (!senderSortedList.isEmpty()) {
             Pair<BigInteger, BigDecimal> senderPair = senderSortedList.get(0);
             Pair<BigInteger, BigDecimal> recipientPair = recipientSortedList.get(0);
 
-            System.out.println("TEST");
             System.out.println("recipientPair sorted list:");
             recipientSortedList.forEach(p -> System.out.println(senderPair.getKey() + ":" + p.getValue()));
             System.out.println("sender sorted list:");
@@ -371,25 +359,18 @@ public class PartyController implements PartyApi {
             }
         }
 
-
         System.out.println(paymentEntities);
-
         paymentRepository.deleteAll(paymentRepository.findAllByPartyId(partyEntityOpt.get().getPartyId()));
-
         paymentRepository.saveAll(paymentEntities);
-
         System.out.println(paymentEntities);
-
 
         List<Payment> payments = paymentEntities
                 .stream()
                 .map(paymentMapper::map)
                 .collect(Collectors.toList());
 
-
         ArrayOfPayments arrayOfPayments = new ArrayOfPayments();
         arrayOfPayments.addAll(payments);
-
         return ResponseEntity.ok(arrayOfPayments);
     }
 
