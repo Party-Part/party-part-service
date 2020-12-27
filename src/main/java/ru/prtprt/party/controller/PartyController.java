@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
