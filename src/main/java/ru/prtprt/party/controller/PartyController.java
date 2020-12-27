@@ -23,10 +23,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@CrossOrigin(origins = "http://localhost:8080")
 public class PartyController implements PartyApi {
 
     PartyMapper partyMapper;
