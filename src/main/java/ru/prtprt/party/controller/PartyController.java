@@ -57,8 +57,10 @@ public class PartyController implements PartyApi {
             System.out.println("Found party: " + partyEntityOpt.get());
             Party response = partyMapper.mapPartyEntityToParty(partyEntityOpt.get());
             return ResponseEntity.ok(response);
-        } else
-            return ResponseEntity.notFound().build();
+        } else {
+            System.out.println("Party not found. Id: " + partyId);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @Override
