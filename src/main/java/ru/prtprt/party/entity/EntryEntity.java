@@ -1,22 +1,18 @@
 package ru.prtprt.party.entity;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Set;
 
 @Entity(name = "entry")
 @Getter
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString
 public class EntryEntity {
 
     @Id

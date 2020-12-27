@@ -1,22 +1,19 @@
 package ru.prtprt.party.entity;
 
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Set;
 
 @Entity(name = "party")
 @Getter
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString
 public class PartyEntity {
 
     @Id

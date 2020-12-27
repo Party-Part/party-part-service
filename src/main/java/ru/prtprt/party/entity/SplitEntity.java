@@ -1,9 +1,6 @@
 package ru.prtprt.party.entity;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.prtprt.party.entity.embedded.SplitEntityId;
 
@@ -16,6 +13,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString
 public class SplitEntity {
 
     @EmbeddedId
