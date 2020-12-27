@@ -15,7 +15,6 @@ import ru.prtprt.party.model.api.PartyApi;
 import ru.prtprt.party.model.model.*;
 import ru.prtprt.party.repository.*;
 
-import javax.persistence.AttributeOverrides;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -55,6 +54,7 @@ public class PartyController implements PartyApi {
         Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
 
         if (partyEntityOpt.isPresent()) {
+            System.out.println("Found party: " + partyEntityOpt.get());
             Party response = partyMapper.mapPartyEntityToParty(partyEntityOpt.get());
             return ResponseEntity.ok(response);
         } else
