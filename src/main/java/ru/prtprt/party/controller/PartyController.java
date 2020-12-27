@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:8080")
 public class PartyController implements PartyApi {
 
     PartyMapper partyMapper;
