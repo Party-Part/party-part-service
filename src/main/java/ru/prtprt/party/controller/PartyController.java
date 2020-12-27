@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.prtprt.party.entity.*;
 import ru.prtprt.party.entity.embedded.SplitEntityId;
 import ru.prtprt.party.mapper.PartyMapper;
+import ru.prtprt.party.mapper.PaymentMapper;
 import ru.prtprt.party.model.api.PartyApi;
 import ru.prtprt.party.model.model.*;
 import ru.prtprt.party.repository.*;
 
+import javax.persistence.AttributeOverrides;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class PartyController implements PartyApi {
 
     PartyMapper partyMapper;
+    PaymentMapper paymentMapper;
 
     PartyRepository partyRepository;
     UserRepository userRepository;
@@ -348,28 +351,39 @@ public class PartyController implements PartyApi {
         System.out.println(paymentEntities);
 
 
-        List<Payment> payments = paymentEntities.stream().map(
-                paymentEntity -> {
-                    Payment payment = new Payment();
-                    payment.setPaymentId(paymentEntity.getPaymentId().toString());
-                    payment.setUserSenderId(paymentEntity.getUserIdSender().toString());
-                    payment.setUserReceiverId(paymentEntity.getUserIdReceiver().toString());
-                    payment.setCost(paymentEntity.getCost().toString());
-                    payment.currency(paymentEntity.getCurrency());
-                    payment.setPartyId(paymentEntity.getPartyId().toString());
-                    payment.setIsConfirmed(paymentEntity.getIsConfirmed());
-                    payment.setIsPaid(paymentEntity.getIsPaid());
-                    return payment;
-                }
-        ).collect(Collectors.toList());
+        List<Payment> payments = paymentEntities
+                .stream()
+                .map(paymentMapper::map)
+                .collect(Collectors.toList());
 
 
         ArrayOfPayments arrayOfPayments = new ArrayOfPayments();
         arrayOfPayments.addAll(payments);
 
         return ResponseEntity.ok(arrayOfPayments);
+    }
 
+    @Override
+    public ResponseEntity<ArrayOfPayments> getPartyPayments(String partyId) {
+        Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
 
+        if (partyEntityOpt.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        List<PaymentEntity> allByPartyId = paymentRepository.findAllByPartyId(partyEntityOpt.get().getPartyId());
+
+        if (allByPartyId.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        List<Payment> payments = allByPartyId
+                .stream()
+                .map(paymentMapper::map)
+                .collect(Collectors.toList());
+
+        ArrayOfPayments arrayOfPayments = new ArrayOfPayments();
+        arrayOfPayments.addAll(payments);
+
+        return ResponseEntity.ok(arrayOfPayments);
     }
 
     private PaymentEntity createPaymentEntity(BigInteger from, BigInteger to, BigDecimal cost, BigInteger partyId) {
