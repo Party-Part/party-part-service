@@ -66,6 +66,44 @@
         }
       }
     },
+    "/party_tg": {
+      "post": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Create a new party from telegram",
+        "description": "",
+        "operationId": "createPartyTelegram",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "userId",
+            "schema": {
+              "$ref": "#/definitions/CreatePartyTelegramRequest"
+            },
+            "description": "User who creates the party",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Party"
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
     "/party/{partyId}": {
       "get": {
         "tags": [
@@ -330,6 +368,23 @@
         "name": {
           "type": "string",
           "description": "Name of a party"
+        }
+      }
+    },
+    "CreatePartyTelegramRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Big int user creator id"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of a party"
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Telegram chat id"
         }
       }
     },

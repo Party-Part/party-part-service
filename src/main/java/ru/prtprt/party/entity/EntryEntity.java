@@ -12,7 +12,6 @@ import java.math.BigInteger;
 @Setter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ToString
 public class EntryEntity {
 
     @Id
