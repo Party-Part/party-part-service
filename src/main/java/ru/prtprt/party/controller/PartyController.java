@@ -53,6 +53,11 @@ public class PartyController implements PartyApi {
     @Override
     public ResponseEntity<Party> createPartyTelegram(@Valid CreatePartyTelegramRequest body) {
 
+        if(telegramPartyRepository.findById(new BigInteger(body.getChatId())).isPresent()) {
+            System.out.println("TG patry already exist");
+            return ResponseEntity.badRequest().build();
+        }
+
         PartyEntity partyEntity = new PartyEntity();
         partyEntity.setName(body.getName());
         partyEntity.setCreatorId(new BigInteger(body.getUserId()));
