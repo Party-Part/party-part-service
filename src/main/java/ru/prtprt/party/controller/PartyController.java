@@ -132,13 +132,15 @@ public class PartyController implements PartyApi {
         ArrayOfMembers arrayOfMembers = new ArrayOfMembers();
 
         Set<UserEntity> listOfUsers = partyEntityOpt.get().getMemberInParty();
-
+        Comparator<Member> comparatorById = Comparator.comparing(Member::getUserId);
         List<Member> listOfMembers = listOfUsers.stream().map(userEntity -> {
             Member member = new Member();
-            member.setLogin(userEntity.getLogin());
+            member.setLogin(userEntity.getName());
             member.setUserId(userEntity.getUserId().toString());
             return member;
-        }).collect(Collectors.toList());
+        })
+        .sorted(comparatorById)
+        .collect(Collectors.toList());
 
         arrayOfMembers.addAll(listOfMembers);
 
