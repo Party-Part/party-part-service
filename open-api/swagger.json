@@ -104,6 +104,42 @@
         }
       }
     },
+    "/party_tg/{chatId}": {
+      "get": {
+        "tags": [
+          "party"
+        ],
+        "summary": "get party from tg chat id",
+        "description": "",
+        "operationId": "getTgParty",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chatId",
+            "type": "string",
+            "description": "The telegram chat id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Party"
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
     "/party/{partyId}": {
       "get": {
         "tags": [

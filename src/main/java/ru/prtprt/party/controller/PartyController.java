@@ -81,6 +81,19 @@ public class PartyController implements PartyApi {
     }
 
     @Override
+    public ResponseEntity<Party> getTgParty(String chatId) {
+        Optional<TelegramPartyEntity> telegramPartyEntityOpt = telegramPartyRepository.findById(new BigInteger(chatId));
+
+        if (telegramPartyEntityOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        PartyEntity partyEntity = partyRepository.findById(telegramPartyEntityOpt.get().getPartyId()).orElseThrow(RuntimeException::new);
+        Party response = partyMapper.mapPartyEntityToParty(partyEntity);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
     public ResponseEntity<Party> getParty(String partyId) {
         Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
 
