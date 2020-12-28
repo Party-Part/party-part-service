@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 import java.math.BigInteger;
-import java.util.List;
+import java.util.Set;
 
 @Entity(name = "party")
 @Getter
@@ -27,8 +27,8 @@ public class PartyEntity {
     @JoinTable(name = "member_in_party",
             joinColumns = @JoinColumn(name = "party_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    List<UserEntity> memberInParty;
+    Set<UserEntity> memberInParty;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "party")
-    List<EntryEntity> entries;
+    Set<EntryEntity> entries;
 }

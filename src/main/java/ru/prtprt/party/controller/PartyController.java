@@ -118,7 +118,7 @@ public class PartyController implements PartyApi {
 
         ArrayOfMembers arrayOfMembers = new ArrayOfMembers();
 
-        List<UserEntity> listOfUsers = partyEntityOpt.get().getMemberInParty();
+        Set<UserEntity> listOfUsers = partyEntityOpt.get().getMemberInParty();
 
         List<Member> listOfMembers = listOfUsers.stream().map(userEntity -> {
             Member member = new Member();
@@ -184,7 +184,7 @@ public class PartyController implements PartyApi {
         if (partyEntityOpt.isEmpty())
             return ResponseEntity.notFound().build();
 
-        List<EntryEntity> entryEntityList = partyEntityOpt.get().getEntries();
+        Set<EntryEntity> entryEntityList = partyEntityOpt.get().getEntries();
 
         List<Entry> entryList = entryEntityList
                 .stream()
@@ -228,7 +228,7 @@ public class PartyController implements PartyApi {
         if (partyEntityOpt.isEmpty())
             return ResponseEntity.notFound().build();
 
-        List<EntryEntity> entryEntityList = partyEntityOpt.get().getEntries();
+        Set<EntryEntity> entryEntityList = partyEntityOpt.get().getEntries();
 
         List<Pair<BigInteger, BigDecimal>> payingList = entryEntityList
                 .stream()
