@@ -135,7 +135,7 @@ public class PartyController implements PartyApi {
         Comparator<Member> comparatorById = Comparator.comparing(Member::getUserId);
         List<Member> listOfMembers = listOfUsers.stream().map(userEntity -> {
             Member member = new Member();
-            member.setLogin(userEntity.getName());
+            member.setName(userEntity.getName());
             member.setUserId(userEntity.getUserId().toString());
             return member;
         })

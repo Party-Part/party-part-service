@@ -517,9 +517,9 @@
           "type": "string",
           "description": "Big int user id"
         },
-        "login": {
+        "name": {
           "type": "string",
-          "description": "User login"
+          "description": "User name"
         }
       }
     },
