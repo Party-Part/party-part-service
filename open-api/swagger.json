@@ -71,9 +71,9 @@
         "tags": [
           "party"
         ],
-        "summary": "Create a new party from telegram",
+        "summary": "Create a new party from telegram or return existing party",
         "description": "",
-        "operationId": "createPartyTelegram",
+        "operationId": "getOrCreatePartyTelegram",
         "consumes": [
           "application/json"
         ],
