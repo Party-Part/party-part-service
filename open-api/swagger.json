@@ -249,12 +249,12 @@
         }
       }
     },
-    "/party/{partyId}/enrty": {
+    "/party/{partyId}/entry": {
       "post": {
         "tags": [
           "party"
         ],
-        "summary": "Add enrty to a party",
+        "summary": "Add entry to a party",
         "description": "",
         "operationId": "addPartyEntry",
         "consumes": [
