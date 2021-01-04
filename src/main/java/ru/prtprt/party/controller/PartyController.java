@@ -139,8 +139,8 @@ public class PartyController implements PartyApi {
             member.setUserId(userEntity.getUserId().toString());
             return member;
         })
-        .sorted(comparatorById)
-        .collect(Collectors.toList());
+                .sorted(comparatorById)
+                .collect(Collectors.toList());
 
         arrayOfMembers.addAll(listOfMembers);
 
@@ -414,6 +414,28 @@ public class PartyController implements PartyApi {
         arrayOfPayments.addAll(payments);
 
         return ResponseEntity.ok(arrayOfPayments);
+    }
+
+    @Override
+    public ResponseEntity<String> deletePartyEntry(String partyId, String entryId) {
+        Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
+
+        if (partyEntityOpt.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        BigInteger entryIdBigInteger = new BigInteger(entryId);
+
+        Optional<EntryEntity> toDelete = partyEntityOpt.get().getEntries()
+                .stream()
+                .filter(entryEntity -> entryEntity.getEntryId().equals(entryIdBigInteger))
+                .findFirst();
+
+        if(toDelete.isPresent()) {
+            partyEntityOpt.get().getEntries().remove(toDelete.get());
+            partyRepository.save(partyEntityOpt.get());
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     private PaymentEntity createPaymentEntity(BigInteger from, BigInteger to, BigDecimal cost, BigInteger partyId) {
