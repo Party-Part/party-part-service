@@ -8,4 +8,5 @@ import java.math.BigInteger;
 
 @Component
 public interface EntryRepository extends CrudRepository<EntryEntity, BigInteger> {
+    void deleteByEntryId(BigInteger entryId);
 }

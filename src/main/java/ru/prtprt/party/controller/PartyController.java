@@ -16,6 +16,7 @@ import ru.prtprt.party.model.api.PartyApi;
 import ru.prtprt.party.model.model.*;
 import ru.prtprt.party.repository.*;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -417,6 +418,7 @@ public class PartyController implements PartyApi {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> deletePartyEntry(String partyId, String entryId) {
         Optional<PartyEntity> partyEntityOpt = partyRepository.findById(new BigInteger(partyId));
 
@@ -431,8 +433,8 @@ public class PartyController implements PartyApi {
                 .findFirst();
 
         if(toDelete.isPresent()) {
-            partyEntityOpt.get().getEntries().remove(toDelete.get());
-            partyRepository.save(partyEntityOpt.get());
+            splitRepository.deleteAllById_Entry(toDelete.get().getEntryId());
+            entryRepository.delete(toDelete.get());
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();

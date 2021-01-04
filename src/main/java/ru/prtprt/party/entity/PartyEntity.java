@@ -29,6 +29,6 @@ public class PartyEntity {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     Set<UserEntity> memberInParty;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "party")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "party")
     Set<EntryEntity> entries;
 }
