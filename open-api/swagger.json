@@ -249,6 +249,46 @@
         }
       }
     },
+    "/party/{partyId}/member/{memberId}": {
+      "delete": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Add member to a party",
+        "description": "",
+        "operationId": "deletePartyMember",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "partyId",
+            "type": "string",
+            "description": "The patry id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "memberId",
+            "type": "string",
+            "description": "The member id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "404": {
+            "description": "Member not found"
+          }
+        }
+      }
+    },
     "/party/{partyId}/entry": {
       "post": {
         "tags": [
@@ -322,6 +362,50 @@
           },
           "405": {
             "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/party/{partyId}/entry/{entryId}": {
+      "delete": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Delete entry from a party",
+        "description": "",
+        "operationId": "deletePartyEntry",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "partyId",
+            "type": "string",
+            "description": "The patry id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entryId",
+            "type": "string",
+            "description": "The entry id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "string",
+              "description": "The patry id"
+            }
+          },
+          "404": {
+            "description": "Entry not found"
           }
         }
       }
