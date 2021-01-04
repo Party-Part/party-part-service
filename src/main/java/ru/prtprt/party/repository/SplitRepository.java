@@ -13,4 +13,5 @@ import java.util.List;
 @Component
 public interface SplitRepository extends CrudRepository<SplitEntity, SplitEntityId> {
     List<SplitEntity> findAllByIdEntry(BigInteger entryEntity);
+    void deleteAllById_Entry(BigInteger entryEntity);
 }
