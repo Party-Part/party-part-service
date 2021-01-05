@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -171,21 +172,44 @@ public class PartyController implements PartyApi {
 
         //parse split entities and save (update) manually
         HashSet<SplitEntity> splitEntities = new HashSet<>();
-        Arrays.stream(body.getSplit().split(";"))
-                .map(str -> str.replace("(", "").replace(")", "").trim())
-                .forEach(str -> {
-                            //pair <userId, percent>
-                            String[] splitted = str.split(",");
-                            UserEntity splitUser = userRepository.findById(new BigInteger(splitted[0].trim())).orElseThrow();
-                            SplitEntityId splitEntityId = new SplitEntityId();
-                            splitEntityId.setEntry(entryEntity.getEntryId());
-                            splitEntityId.setUser(splitUser.getUserId());
-                            SplitEntity splitEntity = new SplitEntity();
-                            splitEntity.setId(splitEntityId);
-                            splitEntity.setCost(new BigDecimal(splitted[1].trim()));
-                            splitEntities.add(splitEntity);
-                        }
-                );
+        //if has split
+        if (StringUtils.isNotEmpty(body.getSplit())) {
+            Arrays.stream(body.getSplit().split(";"))
+                    .map(str -> str.replace("(", "").replace(")", "").trim())
+                    .forEach(str -> {
+                                //pair <userId, percent>
+                                String[] splitted = str.split(",");
+                                UserEntity splitUser = userRepository.findById(new BigInteger(splitted[0].trim())).orElseThrow();
+                                SplitEntityId splitEntityId = new SplitEntityId();
+                                splitEntityId.setEntry(entryEntity.getEntryId());
+                                splitEntityId.setUser(splitUser.getUserId());
+                                SplitEntity splitEntity = new SplitEntity();
+                                splitEntity.setId(splitEntityId);
+                                splitEntity.setCost(new BigDecimal(splitted[1].trim()));
+                                splitEntities.add(splitEntity);
+                            }
+                    );
+        } else {
+            //auto split
+            int countMembers = partyEntityOpt.get().getMemberInParty().size();
+            long costInt = entryEntity.getCost().intValue();
+            long quotient = costInt / countMembers;
+            long remain = costInt % countMembers;
+            for (UserEntity member : partyEntityOpt.get().getMemberInParty()) {
+                SplitEntityId splitEntityId = new SplitEntityId();
+                splitEntityId.setEntry(entryEntity.getEntryId());
+                splitEntityId.setUser(member.getUserId());
+                SplitEntity splitEntity = new SplitEntity();
+                splitEntity.setId(splitEntityId);
+                if (remain > 0) {
+                    splitEntity.setCost(new BigDecimal(quotient + 1));
+                    --remain;
+                } else {
+                    splitEntity.setCost(new BigDecimal(quotient));
+                }
+                splitEntities.add(splitEntity);
+            }
+        }
 
         splitRepository.deleteAll(splitRepository.findAllByIdEntry(entryEntity.getEntryId()));
         splitRepository.saveAll(splitEntities);
@@ -432,7 +456,7 @@ public class PartyController implements PartyApi {
                 .filter(entryEntity -> entryEntity.getEntryId().equals(entryIdBigInteger))
                 .findFirst();
 
-        if(toDelete.isPresent()) {
+        if (toDelete.isPresent()) {
             splitRepository.deleteAllById_Entry(toDelete.get().getEntryId());
             entryRepository.delete(toDelete.get());
             return ResponseEntity.ok().build();
