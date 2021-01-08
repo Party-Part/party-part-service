@@ -464,6 +464,59 @@ public class PartyController implements PartyApi {
         return ResponseEntity.notFound().build();
     }
 
+    @Override
+    public ResponseEntity<ArrayOfParties> getPartyCreated(String memberId) {
+        BigInteger memberIdBigInteger = new BigInteger(memberId);
+        if (userRepository.findById(memberIdBigInteger).isEmpty())
+            return ResponseEntity.notFound().build();
+
+        List<PartyEntity> partyEntityList = partyRepository.getAllByCreatorId(memberIdBigInteger);
+
+        List<Party> partyList = partyEntityList.stream().map(partyMapper::mapPartyEntityToParty).collect(Collectors.toList());
+        ArrayOfParties arrayOfParties = new ArrayOfParties();
+        arrayOfParties.addAll(partyList);
+
+        return ResponseEntity.ok(arrayOfParties);
+    }
+
+    @Override
+    public ResponseEntity<ArrayOfParties> getPartyParticipated(String memberId) {
+        BigInteger memberIdBigInteger = new BigInteger(memberId);
+        Optional<UserEntity> userEntity = userRepository.findById(memberIdBigInteger);
+        if (userEntity.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        List<PartyEntity> partyEntityList = partyRepository.getAllByMemberInParty(userEntity.get());
+
+        List<Party> partyList = partyEntityList.stream().map(partyMapper::mapPartyEntityToParty).collect(Collectors.toList());
+        ArrayOfParties arrayOfParties = new ArrayOfParties();
+        arrayOfParties.addAll(partyList);
+
+        return ResponseEntity.ok(arrayOfParties);
+    }
+
+    @Override
+    public ResponseEntity<Void> setPaymentPaid(String paymentId) {
+        Optional<PaymentEntity> paymentEntity = paymentRepository.findById(new BigInteger(paymentId));
+        if (paymentEntity.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        paymentEntity.get().setIsPaid(Boolean.TRUE);
+        paymentRepository.save(paymentEntity.get());
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> setPaymentReject(String paymentId) {
+        Optional<PaymentEntity> paymentEntity = paymentRepository.findById(new BigInteger(paymentId));
+        if (paymentEntity.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        paymentEntity.get().setIsPaid(Boolean.FALSE);
+        paymentRepository.save(paymentEntity.get());
+        return ResponseEntity.ok().build();
+    }
+
     private PaymentEntity createPaymentEntity(BigInteger from, BigInteger to, BigDecimal cost, BigInteger partyId) {
         PaymentEntity paymentEntity = new PaymentEntity();
         paymentEntity.setUserIdSender(from);
