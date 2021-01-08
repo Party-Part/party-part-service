@@ -475,6 +475,132 @@
           }
         }
       }
+    },
+    "/member/{memberId}/created": {
+      "get": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Get all parties that this user created",
+        "description": "",
+        "operationId": "getPartyCreated",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "memberId",
+            "type": "string",
+            "description": "The member id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ArrayOfParties"
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/member/{memberId}/participated": {
+      "get": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Get all parties that this user take part",
+        "description": "",
+        "operationId": "getPartyParticipated",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "memberId",
+            "type": "string",
+            "description": "The member id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ArrayOfParties"
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/payment/{paymentId}/paid": {
+      "put": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Set payment as paid",
+        "description": "",
+        "operationId": "setPaymentPaid",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "paymentId",
+            "type": "string",
+            "description": "The payment id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/payment/{paymentId}/reject": {
+      "put": {
+        "tags": [
+          "party"
+        ],
+        "summary": "Set payment as not paid",
+        "description": "",
+        "operationId": "setPaymentReject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "paymentId",
+            "type": "string",
+            "description": "The payment id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "405": {
+            "description": "Invalid inputr"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -673,6 +799,12 @@
       "type": "array",
       "items": {
         "$ref": "#/definitions/Payment"
+      }
+    },
+    "ArrayOfParties": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Party"
       }
     }
   }
