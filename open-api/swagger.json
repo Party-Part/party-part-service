@@ -329,6 +329,9 @@
               "description": "The patry id"
             }
           },
+          "400": {
+            "description": "Sum of entry and sum of splits are not equal"
+          },
           "405": {
             "description": "Invalid input"
           }
