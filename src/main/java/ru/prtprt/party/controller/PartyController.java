@@ -211,7 +211,11 @@ public class PartyController implements PartyApi {
             }
         }
 
-        splitRepository.deleteAll(splitRepository.findAllByIdEntry(entryEntity.getEntryId()));
+        BigDecimal splitSum = splitEntities.stream().map(SplitEntity::getCost).reduce(BigDecimal::add).orElseThrow(RuntimeException::new);
+        if (!splitSum.subtract(entryEntity.getCost()).equals(BigDecimal.ZERO)) {
+            entryRepository.delete(entryEntity);
+            return ResponseEntity.badRequest().build();
+        }
         splitRepository.saveAll(splitEntities);
 
         return ResponseEntity.ok().build();
