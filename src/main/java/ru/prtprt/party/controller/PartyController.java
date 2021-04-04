@@ -479,7 +479,6 @@ public class PartyController implements PartyApi {
         List<Party> partyList = partyEntityList.stream().map(partyMapper::mapPartyEntityToParty).collect(Collectors.toList());
         ArrayOfParties arrayOfParties = new ArrayOfParties();
         arrayOfParties.addAll(partyList);
-
         return ResponseEntity.ok(arrayOfParties);
     }
 
